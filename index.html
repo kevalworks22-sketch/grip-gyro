@@ -1,0 +1,470 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Grip &amp; Gyro">
+<meta name="theme-color" content="#000000">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icon-180.png">
+<title>Grip &amp; Gyro Challenge</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700&family=Geist+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  /* Display: one screen, portrait first. Black hero (logo, headline, score to beat) -> 3 steps -> podium -> ranks 4-10. Admin: phone form. */
+  --bg: #ffffff;
+  --soft: #f2f2f2;
+  --ink: #111111;
+  --muted: rgba(17,17,17,.56);
+  --line: #e5e5e5;
+  --night: #0b0b0b;
+  --cobalt: #112baf;
+  --sand: #c4beb1;
+  --gold: #c9a24a;
+  --silver: #a9aeb6;
+  --bronze: #b07a4f;
+  --good: #1e8a5a;
+  --bad: #c3352b;
+  --sans: "Geist", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --mono: "Geist Mono", ui-monospace, Menlo, monospace;
+  color-scheme: light;
+}
+* { box-sizing: border-box; }
+html, body { height: 100%; margin: 0; }
+body { background: var(--bg); color: var(--ink); font-family: var(--sans); letter-spacing: -0.01em; -webkit-font-smoothing: antialiased; }
+button, input { font: inherit; color: inherit; letter-spacing: inherit; }
+:focus-visible { outline: 2px solid var(--cobalt); outline-offset: 2px; }
+.mono { font-family: var(--mono); font-variant-numeric: tabular-nums; letter-spacing: -0.03em; }
+[hidden] { display: none !important; }
+
+/* ================= DISPLAY ================= */
+#display { height: 100%; display: flex; flex-direction: column; gap: 1.6vh; padding: max(1.8vh, env(safe-area-inset-top)) 2.4vw max(1.8vh, env(safe-area-inset-bottom)); overflow: hidden; }
+.hero { background: var(--night); color: #fff; border-radius: 28px; padding: 3vh 4vw; display: grid; grid-template-columns: 1fr; gap: 2.4vh; position: relative; overflow: hidden; flex: none; }
+.hero::after { content: ""; position: absolute; right: -14vw; top: -14vw; width: 46vw; height: 46vw; border-radius: 50%; background: radial-gradient(closest-side, rgba(17,43,175,.6), rgba(17,43,175,0)); pointer-events: none; }
+.hero > * { position: relative; z-index: 1; }
+.hero .top { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; }
+.hero .logo { height: clamp(44px, 6vh, 86px); width: auto; display: block; }
+.live { display: inline-flex; align-items: center; gap: 10px; font-size: clamp(12px, 1.5vh, 18px); letter-spacing: .16em; text-transform: uppercase; color: rgba(255,255,255,.75); border: 1px solid rgba(255,255,255,.2); border-radius: 999px; padding: 8px 14px; }
+.live i { width: 9px; height: 9px; border-radius: 50%; background: #ff3b30; animation: blink 1.2s infinite; }
+@keyframes blink { 50% { opacity: .25; } }
+.hero h1 { font-weight: 500; font-size: clamp(40px, 6.6vh, 96px); line-height: .96; letter-spacing: -0.05em; margin: 0; text-wrap: balance; }
+.hero p { margin: 1vh 0 0; font-size: clamp(16px, 2vh, 26px); color: rgba(255,255,255,.72); max-width: 32ch; }
+.beat { background: rgba(255,255,255,.06); border: 1px solid rgba(255,255,255,.14); border-radius: 22px; padding: 2.2vh 3vw; display: grid; grid-template-columns: 1fr auto; align-items: end; gap: 8px 24px; }
+.beat .lbl { grid-column: 1 / -1; font-size: clamp(12px, 1.4vh, 17px); letter-spacing: .16em; text-transform: uppercase; color: var(--sand); }
+.beat .big { font-family: var(--mono); font-size: clamp(64px, 10vh, 150px); line-height: .85; font-weight: 500; letter-spacing: -0.06em; }
+.beat .big small { font-size: .26em; color: rgba(255,255,255,.5); letter-spacing: 0; margin-left: 8px; }
+.beat .who { font-size: clamp(16px, 2vh, 26px); margin-top: .8vh; overflow-wrap: anywhere; }
+.beat .stats { display: flex; flex-direction: column; gap: 1vh; text-align: right; font-size: clamp(12px, 1.3vh, 16px); color: rgba(255,255,255,.6); }
+.beat .stats b { display: block; font-family: var(--mono); font-size: clamp(20px, 2.6vh, 34px); color: #fff; font-weight: 500; letter-spacing: -0.03em; }
+
+.steps { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.4vw; flex: none; }
+.step { background: var(--soft); border-radius: 20px; padding: 1.6vh 1.8vw; display: flex; gap: 12px; align-items: center; }
+.step .n { flex: none; width: clamp(32px, 4vh, 48px); height: clamp(32px, 4vh, 48px); border-radius: 50%; background: var(--ink); color: #fff; display: grid; place-items: center; font-family: var(--mono); font-size: clamp(12px, 1.4vh, 17px); }
+.step b { display: block; font-weight: 600; font-size: clamp(15px, 2vh, 26px); letter-spacing: -0.02em; }
+.step span { color: var(--muted); font-size: clamp(11px, 1.3vh, 16px); }
+
+.podium { display: grid; grid-template-columns: 1fr 1fr; gap: 1.4vw; flex: none; }
+.place { background: var(--soft); border-radius: 24px; padding: 2vh 2.6vw; display: flex; flex-direction: column; gap: .6vh; min-width: 0; }
+.place.p1 { grid-column: 1 / -1; background: var(--cobalt); color: #fff; display: grid; grid-template-columns: 1fr auto; align-items: end; }
+.place .medal { display: inline-flex; align-items: center; gap: 8px; font-size: clamp(12px, 1.4vh, 17px); letter-spacing: .16em; text-transform: uppercase; }
+.place .medal i { width: 12px; height: 12px; border-radius: 50%; }
+.p1 .medal i { background: var(--gold); } .p2 .medal i { background: var(--silver); } .p3 .medal i { background: var(--bronze); }
+.place .name { font-weight: 500; font-size: clamp(22px, 3vh, 40px); line-height: 1.05; letter-spacing: -0.035em; overflow-wrap: anywhere; }
+.p1 .name { font-size: clamp(28px, 4.4vh, 60px); }
+.place .score { font-family: var(--mono); font-weight: 500; font-size: clamp(36px, 5vh, 68px); line-height: 1; letter-spacing: -0.05em; }
+.p1 .score { font-size: clamp(56px, 8vh, 112px); text-align: right; }
+.place .score small { font-size: .3em; opacity: .55; margin-left: 4px; letter-spacing: 0; }
+.place .parts { font-size: clamp(12px, 1.4vh, 17px); opacity: .65; }
+.place.empty .name { opacity: .45; }
+
+.ranks { flex: 1 1 auto; min-height: 0; border: 1px solid var(--line); border-radius: 22px; overflow: hidden; display: flex; flex-direction: column; }
+.ranks .row { display: grid; grid-template-columns: 3.4em 1fr 6em 7em 5.4em; align-items: center; gap: 8px; padding: 0 2vw; height: clamp(40px, 5vh, 64px); border-bottom: 1px solid var(--line); font-size: clamp(14px, 1.8vh, 22px); }
+.ranks .row:last-child { border-bottom: 0; }
+.ranks .head { height: clamp(32px, 3.6vh, 44px); font-size: clamp(10px, 1.2vh, 14px); letter-spacing: .14em; text-transform: uppercase; color: var(--muted); }
+.ranks .rk { font-family: var(--mono); color: var(--muted); }
+.ranks .nm { font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.ranks .r { text-align: right; font-family: var(--mono); }
+.ranks .sc { font-weight: 600; }
+.ranks .empty { padding: 2vh 2vw; color: var(--muted); font-size: clamp(14px, 1.8vh, 22px); }
+.row.flash { animation: flash 2.6s ease-out; }
+@keyframes flash { from { background: rgba(17,43,175,.14); } to { background: transparent; } }
+.foot { flex: none; display: flex; justify-content: space-between; gap: 10px; font-size: clamp(11px, 1.3vh, 15px); color: var(--muted); }
+.conn { display: inline-flex; align-items: center; gap: 7px; }
+.conn i { width: 7px; height: 7px; border-radius: 50%; background: var(--muted); }
+.conn.live i { background: var(--good); } .conn.err i { background: var(--bad); }
+
+/* Landscape display */
+@media (orientation: landscape) {
+  .hero { grid-template-columns: 1.3fr 1fr; align-items: end; padding: 3vh 3vw; }
+  .hero .top { grid-column: 1 / -1; }
+  .hero h1 { font-size: clamp(36px, 7.4vh, 96px); }
+  #display { display: grid; grid-template-columns: 1.15fr 1fr; grid-template-rows: auto auto 1fr auto; gap: 1.6vh 1.4vw; }
+  .hero, .steps, .foot { grid-column: 1 / -1; }
+  .podium { grid-row: 3; grid-column: 1; align-content: start; }
+  .ranks { grid-row: 3; grid-column: 2; }
+  .steps .step span { display: none; }
+}
+
+/* Toast */
+.toast { position: fixed; left: 50%; bottom: 4vh; transform: translate(-50%, 160%); background: var(--night); color: #fff; border-radius: 999px; padding: 1.6vh 2.6vw; display: flex; align-items: center; gap: 16px; font-size: clamp(16px, 2.4vh, 32px); box-shadow: 0 14px 40px rgba(0,0,0,.25); transition: transform .45s cubic-bezier(.2,.9,.3,1.2); z-index: 40; max-width: calc(100% - 32px); white-space: nowrap; }
+.toast:not(.show) { visibility: hidden; transition: transform .45s, visibility 0s .45s; }
+.toast.show { transform: translate(-50%, 0); }
+.toast .tag { background: var(--cobalt); border-radius: 999px; padding: 4px 14px; font-size: .62em; letter-spacing: .14em; text-transform: uppercase; }
+.toast.leader .tag { background: var(--gold); color: var(--night); }
+.toast b { font-family: var(--mono); font-weight: 500; }
+
+/* ================= ADMIN (phone) ================= */
+#admin { max-width: 640px; margin: 0 auto; padding: max(16px, env(safe-area-inset-top)) 16px 48px; display: flex; flex-direction: column; gap: 16px; }
+.abar { display: flex; align-items: center; justify-content: space-between; gap: 10px; background: var(--night); color: #fff; border-radius: 22px; padding: 14px 18px; }
+.abar img { height: 34px; width: auto; display: block; }
+.abar .t { font-size: 13px; color: rgba(255,255,255,.7); text-align: right; }
+.card { background: #fff; border: 1px solid var(--line); border-radius: 22px; padding: 18px; display: flex; flex-direction: column; gap: 12px; }
+.card h2 { font-weight: 500; font-size: 24px; letter-spacing: -0.03em; margin: 0; }
+.hint { margin: 0; color: var(--muted); font-size: 14px; }
+.fields { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.field { display: flex; flex-direction: column; gap: 6px; }
+.field.wide { grid-column: 1 / -1; }
+label { font-size: 13px; color: var(--muted); }
+input[type="text"], input[type="number"], input[type="email"], input[type="password"] { background: var(--soft); border: 1px solid transparent; border-radius: 14px; padding: 14px 16px; font-size: 20px; width: 100%; }
+input[type="number"] { font-family: var(--mono); }
+input:focus { border-color: var(--cobalt); background: #fff; outline: none; }
+.preview { display: flex; align-items: baseline; gap: 10px; color: var(--muted); font-size: 14px; flex-wrap: wrap; }
+.preview b { font-family: var(--mono); font-size: 36px; font-weight: 500; color: var(--ink); letter-spacing: -0.04em; }
+.btn { cursor: pointer; border: 1px solid var(--line); background: #fff; padding: 13px 22px; border-radius: 999px; font-size: 16px; text-decoration: none; display: inline-flex; align-items: center; justify-content: center; }
+.btn.primary { background: var(--cobalt); border-color: var(--cobalt); color: #fff; }
+.btn.dark { background: var(--ink); border-color: var(--ink); color: #fff; }
+.btn.danger { color: var(--bad); }
+.btn.small { padding: 7px 13px; font-size: 13px; }
+.btn.block { width: 100%; }
+.btn[disabled] { opacity: .5; }
+.actions { display: flex; flex-wrap: wrap; gap: 10px; }
+.msg { font-size: 14px; min-height: 18px; }
+.msg.ok { color: var(--good); } .msg.bad { color: var(--bad); }
+.list { border: 1px solid var(--line); border-radius: 16px; overflow: hidden; }
+.item { display: grid; grid-template-columns: 1fr auto; gap: 6px 10px; padding: 12px 14px; border-bottom: 1px solid var(--line); align-items: center; }
+.item:last-child { border-bottom: 0; }
+.item .nm { font-weight: 500; }
+.item .sub { grid-column: 1; color: var(--muted); font-size: 13px; font-family: var(--mono); }
+.item .sc { font-family: var(--mono); font-weight: 600; font-size: 18px; text-align: right; }
+.item .act { grid-column: 2; display: flex; gap: 6px; justify-content: flex-end; }
+textarea { width: 100%; min-height: 120px; background: var(--soft); border: 0; border-radius: 14px; padding: 12px; font: 12px/1.4 var(--mono); }
+.modal { position: fixed; inset: 0; background: rgba(0,0,0,.4); display: flex; align-items: center; justify-content: center; padding: 16px; z-index: 50; }
+.modal .card { max-width: 420px; width: 100%; }
+@media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation: none !important; transition: none !important; } }
+</style>
+</head>
+<body>
+
+<!-- ================= DISPLAY ================= -->
+<main id="display" hidden>
+  <div class="hero">
+    <div class="top">
+      <img class="logo" src="logo.png" alt="Ultrahuman">
+      <span class="live"><i></i>Live challenge</span>
+    </div>
+    <div>
+      <h1>Strongest grip in the room?</h1>
+      <p>One squeeze. One spin. Beat the top score and walk away with Ultrahuman goodies.</p>
+    </div>
+    <div class="beat" id="beat"></div>
+  </div>
+
+  <div class="steps">
+    <div class="step"><div class="n">01</div><div><b>Squeeze</b><span>Grip strength, dominant hand, one try</span></div></div>
+    <div class="step"><div class="n">02</div><div><b>Spin</b><span>Gyroball, as fast as you can, one try</span></div></div>
+    <div class="step"><div class="n">03</div><div><b>Climb the board</b><span>Top 3 win goodies</span></div></div>
+  </div>
+
+  <div class="podium" id="podium"></div>
+  <div class="ranks" id="ranks"></div>
+
+  <div class="foot">
+    <span>Score = average of grip and gyroball points, each out of 100</span>
+    <span class="conn" id="conn"><i></i><span id="connText">Connecting</span></span>
+  </div>
+</main>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<!-- ================= ADMIN ================= -->
+<main id="admin" hidden>
+  <div class="abar"><img src="logo.png" alt="Ultrahuman"><div class="t">Scorekeeper<br><span id="who"></span></div></div>
+
+  <form class="card" id="loginForm" novalidate hidden>
+    <h2>Sign in</h2>
+    <p class="hint">Only the scorekeeper login can add scores.</p>
+    <div class="field"><label for="lEmail">Email</label><input type="email" id="lEmail" autocomplete="username" required></div>
+    <div class="field"><label for="lPass">Password</label><input type="password" id="lPass" autocomplete="current-password" required></div>
+    <button class="btn primary block" type="submit" id="lBtn">Sign in</button>
+    <div class="msg" id="lMsg" role="status"></div>
+  </form>
+
+  <div id="adminBody" hidden style="display:flex;flex-direction:column;gap:16px">
+    <form class="card" id="entryForm" novalidate>
+      <h2 id="formTitle">New challenger</h2>
+      <div class="fields">
+        <div class="field wide"><label for="fName">Name</label><input type="text" id="fName" maxlength="40" autocomplete="off" required></div>
+        <div class="field"><label for="fAge">Age</label><input type="number" id="fAge" inputmode="numeric" min="5" max="100" step="1"></div>
+        <div class="field"><label for="fGrip">Grip, dominant (kg)</label><input type="number" id="fGrip" inputmode="decimal" min="0" max="150" step="0.1" required></div>
+        <div class="field wide"><label for="fRpm">Gyroball (RPM)</label><input type="number" id="fRpm" inputmode="numeric" min="0" max="30000" step="1" required></div>
+      </div>
+      <div class="preview">Score <b id="pv">–</b><span id="pvParts"></span></div>
+      <div class="actions">
+        <button class="btn primary" type="submit" id="saveBtn">Save score</button>
+        <button class="btn" type="button" id="cancelEdit" hidden>Cancel edit</button>
+      </div>
+      <div class="msg" id="formMsg" role="status"></div>
+    </form>
+
+    <div class="card">
+      <h2>All entries</h2>
+      <p class="hint">Newest first. Tap Edit to fix a typo.</p>
+      <div class="list" id="entryList"></div>
+    </div>
+
+    <form class="card" id="cfgForm" novalidate>
+      <h2>Scoring</h2>
+      <p class="hint">Each test becomes points out of 100 against its max. At or above the max scores 100. Changing these re-scores everyone.</p>
+      <div class="fields">
+        <div class="field"><label for="cGrip">Grip max (kg)</label><input type="number" id="cGrip" min="10" max="200" step="1"></div>
+        <div class="field"><label for="cRpm">Gyroball max (RPM)</label><input type="number" id="cRpm" min="1000" max="40000" step="100"></div>
+      </div>
+      <button class="btn dark" type="submit">Save scoring</button>
+      <div class="msg" id="cfgMsg" role="status"></div>
+    </form>
+
+    <div class="card">
+      <h2>Results</h2>
+      <div class="actions">
+        <button class="btn dark" type="button" id="copyCsv">Copy results (CSV)</button>
+        <button class="btn danger" type="button" id="clearAll">Clear all</button>
+      </div>
+      <textarea id="csvOut" hidden readonly aria-label="Results CSV"></textarea>
+      <div class="msg" id="resMsg" role="status"></div>
+      <div class="actions"><a class="btn" href="#display">Open display</a><button class="btn" type="button" id="signOut">Sign out</button></div>
+    </div>
+  </div>
+</main>
+
+<div class="modal" id="modal" hidden>
+  <div class="card" role="dialog" aria-modal="true" aria-labelledby="mTitle">
+    <h2 id="mTitle">Are you sure?</h2>
+    <p class="hint" id="mText"></p>
+    <div class="actions"><button class="btn danger" type="button" id="mYes">Delete</button><button class="btn" type="button" id="mNo">Cancel</button></div>
+  </div>
+</div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import { getFirestore, collection, doc, onSnapshot, addDoc, setDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyCvR_LThtYslfAQUeNSGGK9pH4kfiR720w",
+  authDomain: "grip-gyro.firebaseapp.com",
+  projectId: "grip-gyro",
+  storageBucket: "grip-gyro.firebasestorage.app",
+  messagingSenderId: "583990659173",
+  appId: "1:583990659173:web:18bafb97299fc3dbaade8c"
+};
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+const auth = getAuth(app);
+
+const DEFAULT_CFG = { maxGrip: 80, maxRpm: 15000 };
+const state = { entries: [], cfg: { ...DEFAULT_CFG }, ready: false, flashId: null, editingId: null, user: null };
+const $ = (id) => document.getElementById(id);
+
+// ---------- scoring ----------
+const pts = (v, max) => (!(v > 0) || !(max > 0)) ? 0 : Math.min(v / max, 1) * 100;
+const scoreOf = (e) => Math.round(((pts(e.grip, state.cfg.maxGrip) + pts(e.rpm, state.cfg.maxRpm)) / 2) * 10) / 10;
+function ranked() {
+  const list = state.entries.map(e => ({ ...e, score: scoreOf(e) }));
+  list.sort((a, b) => (b.score - a.score) || ((a.createdAt || 0) - (b.createdAt || 0)));
+  list.forEach((e, i) => { e.rank = i + 1; });
+  return list;
+}
+const esc = (s) => String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+const fmt = (n, d = 0) => (n == null || isNaN(n)) ? "–" : Number(n).toLocaleString("en-IN", { maximumFractionDigits: d, minimumFractionDigits: d });
+const first = (n) => String(n || "").split(" ")[0];
+function msg(id, text, ok) { const m = $(id); m.textContent = text; m.className = "msg " + (ok ? "ok" : "bad"); }
+
+// ---------- routing ----------
+function route() {
+  const admin = location.hash === "#admin";
+  $("display").hidden = admin; $("admin").hidden = !admin;
+  document.title = admin ? "Scorekeeper · Grip & Gyro" : "Grip & Gyro Challenge";
+  if (!admin) keepAwake();
+}
+window.addEventListener("hashchange", route);
+
+// keep the display screen awake where supported
+let wake = null;
+async function keepAwake() { try { if ("wakeLock" in navigator && !wake) { wake = await navigator.wakeLock.request("screen"); wake.addEventListener("release", () => { wake = null; }); } } catch (e) {} }
+document.addEventListener("visibilitychange", () => { if (document.visibilityState === "visible" && location.hash !== "#admin") keepAwake(); });
+
+// ---------- display render ----------
+function renderDisplay() {
+  const list = ranked(), top = list[0];
+  const best = list.reduce((m, e) => ({ g: Math.max(m.g, e.grip || 0), r: Math.max(m.r, e.rpm || 0) }), { g: 0, r: 0 });
+  $("beat").innerHTML = top
+    ? `<span class="lbl">Score to beat</span><div><div class="big">${fmt(top.score, 1)}<small>/ 100</small></div><div class="who">held by ${esc(top.name)}</div></div>
+       <div class="stats"><span><b>${list.length}</b>challengers</span><span><b>${fmt(best.g, 1)}</b>best grip kg</span><span><b>${fmt(best.r)}</b>best RPM</span></div>`
+    : `<span class="lbl">Score to beat</span><div><div class="big">00.0<small>/ 100</small></div><div class="who">Nobody yet. Be the first on the board.</div></div>
+       <div class="stats"><span><b>0</b>challengers</span></div>`;
+
+  const labels = ["1st", "2nd", "3rd"];
+  $("podium").innerHTML = [0, 1, 2].map(i => {
+    const e = list[i], cls = `place p${i + 1}`;
+    if (!e) return `<div class="${cls} empty"><div><span class="medal"><i></i>${labels[i]}</span><div class="name">Your name here</div><div class="parts">Spot open</div></div></div>`;
+    const info = `<div><span class="medal"><i></i>${labels[i]}</span><div class="name">${esc(e.name)}</div><div class="parts">Grip ${fmt(e.grip, 1)} kg · Gyro ${fmt(e.rpm)} RPM</div></div>`;
+    return `<div class="${cls}">${info}<div class="score">${fmt(e.score, 1)}<small>/ 100</small></div></div>`;
+  }).join("");
+
+  const rest = list.slice(3, 10);
+  $("ranks").innerHTML = `<div class="row head"><span>Rank</span><span>Name</span><span class="r">Grip kg</span><span class="r">RPM</span><span class="r">Score</span></div>` +
+    (rest.length ? rest.map(e => `<div class="row${e.id === state.flashId ? " flash" : ""}"><span class="rk">${String(e.rank).padStart(2, "0")}</span><span class="nm">${esc(e.name)}</span><span class="r">${fmt(e.grip, 1)}</span><span class="r">${fmt(e.rpm)}</span><span class="r sc">${fmt(e.score, 1)}</span></div>`).join("")
+      : `<div class="empty">${list.length >= 3 ? "Ranks 4 to 10 appear here." : "Step up and claim a podium spot."}</div>`);
+}
+
+// ---------- toast ----------
+let toastTimer = null;
+function toast(html, leader) {
+  const t = $("toast"); t.innerHTML = html; t.className = "toast show" + (leader ? " leader" : "");
+  clearTimeout(toastTimer); toastTimer = setTimeout(() => { t.className = "toast" + (leader ? " leader" : ""); }, 5500);
+}
+function announce(id, before) {
+  const list = ranked(), e = list.find(x => x.id === id); if (!e) return;
+  state.flashId = id;
+  if (e.rank === 1 && (!before[0] || before[0].id !== id)) toast(`<span class="tag">New leader</span><span>${esc(first(e.name))} takes #1 with <b>${fmt(e.score, 1)}</b></span>`, true);
+  else toast(`<span class="tag">New score</span><span>${esc(first(e.name))} · <b>${fmt(e.score, 1)}</b> · #${e.rank}</span>`, false);
+}
+
+// ---------- admin render ----------
+function renderAdmin() {
+  const list = ranked().sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
+  $("entryList").innerHTML = list.length ? list.map(e => `<div class="item"><div><div class="nm">${esc(e.name)}${e.age ? ` <span style="color:var(--muted);font-weight:400">· ${esc(e.age)}</span>` : ""}</div><div class="sub">#${e.rank} · ${fmt(e.grip, 1)} kg · ${fmt(e.rpm)} RPM</div></div><div class="sc">${fmt(e.score, 1)}</div>
+    <div class="act"><button class="btn small" type="button" data-edit="${esc(e.id)}">Edit</button><button class="btn small danger" type="button" data-del="${esc(e.id)}">Delete</button></div></div>`).join("")
+    : `<div class="item"><span class="hint">Nothing entered yet.</span></div>`;
+  if (document.activeElement !== $("cGrip")) $("cGrip").value = state.cfg.maxGrip;
+  if (document.activeElement !== $("cRpm")) $("cRpm").value = state.cfg.maxRpm;
+  updatePreview();
+}
+function render() { renderDisplay(); renderAdmin(); }
+
+// ---------- data ----------
+function setConn(kind, text) { $("conn").className = "conn " + kind; $("connText").textContent = text; }
+const loadTimer = setTimeout(() => { if (!state.ready) setConn("err", "Can't reach scores. Check internet."); }, 10000);
+onSnapshot(doc(db, "config", "settings"), (snap) => { state.cfg = { ...DEFAULT_CFG, ...(snap.exists() ? snap.data() : {}) }; render(); }, () => {});
+onSnapshot(collection(db, "entries"), (snap) => {
+  const before = ranked();
+  state.entries = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+  if (state.ready) { const added = snap.docChanges().filter(c => c.type === "added"); if (added.length) announce(added[added.length - 1].doc.id, before); }
+  if (!snap.metadata.fromCache) { state.ready = true; clearTimeout(loadTimer); setConn("live", "Live"); }
+  render();
+}, () => setConn("err", "Live updates stopped. Reload."));
+
+// ---------- auth ----------
+onAuthStateChanged(auth, (u) => {
+  state.user = u;
+  $("loginForm").hidden = !!u; $("adminBody").hidden = !u;
+  $("who").textContent = u ? (u.email || "") : "";
+});
+$("loginForm").addEventListener("submit", async (ev) => {
+  ev.preventDefault(); $("lBtn").disabled = true;
+  try { await signInWithEmailAndPassword(auth, $("lEmail").value.trim(), $("lPass").value); $("lPass").value = ""; msg("lMsg", "", true); }
+  catch (e) { msg("lMsg", "Sign-in failed. Check the email and password.", false); }
+  $("lBtn").disabled = false;
+});
+$("signOut").addEventListener("click", () => signOut(auth));
+
+function writeErr(e) {
+  if (e && e.code === "permission-denied") return "This login can't save scores. Sign in with the scorekeeper account.";
+  return "Couldn't save. Check the internet connection and try again.";
+}
+
+// ---------- form ----------
+const readForm = () => ({ name: $("fName").value.trim().replace(/\s+/g, " "), age: $("fAge").value === "" ? null : Number($("fAge").value), grip: Number($("fGrip").value), rpm: Number($("fRpm").value) });
+function validate(f) {
+  if (!f.name) return "Enter a name.";
+  if (f.age != null && (!Number.isInteger(f.age) || f.age < 5 || f.age > 100)) return "Age should be a whole number from 5 to 100.";
+  if (!(f.grip > 0) || f.grip > 150) return "Grip should be between 0.1 and 150 kg.";
+  if (!(f.rpm > 0) || f.rpm > 30000) return "Gyroball should be between 1 and 30,000 RPM.";
+  return "";
+}
+function updatePreview() {
+  const f = readForm();
+  if (f.grip > 0 || f.rpm > 0) {
+    const g = pts(f.grip, state.cfg.maxGrip), r = pts(f.rpm, state.cfg.maxRpm);
+    $("pv").textContent = fmt(Math.round(((g + r) / 2) * 10) / 10, 1); $("pvParts").textContent = `grip ${fmt(g, 1)} + gyro ${fmt(r, 1)} pts`;
+  } else { $("pv").textContent = "–"; $("pvParts").textContent = ""; }
+}
+["fGrip", "fRpm"].forEach(id => $(id).addEventListener("input", updatePreview));
+function resetForm() { state.editingId = null; $("entryForm").reset(); $("formTitle").textContent = "New challenger"; $("saveBtn").textContent = "Save score"; $("cancelEdit").hidden = true; updatePreview(); }
+$("cancelEdit").addEventListener("click", () => { resetForm(); msg("formMsg", "", true); });
+
+let saving = false;
+$("entryForm").addEventListener("submit", async (ev) => {
+  ev.preventDefault(); if (saving) return;
+  const f = readForm(), err = validate(f); if (err) { msg("formMsg", err, false); return; }
+  saving = true; $("saveBtn").disabled = true;
+  const editing = state.editingId;
+  try {
+    if (editing) {
+      const old = state.entries.find(e => e.id === editing) || {};
+      await setDoc(doc(db, "entries", editing), { name: f.name, age: f.age, grip: f.grip, rpm: f.rpm, createdAt: old.createdAt || Date.now() });
+    } else {
+      await addDoc(collection(db, "entries"), { name: f.name, age: f.age, grip: f.grip, rpm: f.rpm, createdAt: Date.now() });
+    }
+    const sc = Math.round(((pts(f.grip, state.cfg.maxGrip) + pts(f.rpm, state.cfg.maxRpm)) / 2) * 10) / 10;
+    msg("formMsg", `${editing ? "Updated" : "Saved"} ${f.name}: ${fmt(sc, 1)} / 100.`, true); resetForm();
+  } catch (e) { msg("formMsg", writeErr(e), false); }
+  saving = false; $("saveBtn").disabled = false;
+});
+
+// ---------- list actions ----------
+let pending = null;
+function confirmBox(title, text, yes, fn) { $("mTitle").textContent = title; $("mText").textContent = text; $("mYes").textContent = yes; pending = fn; $("modal").hidden = false; }
+$("mNo").addEventListener("click", () => { $("modal").hidden = true; pending = null; });
+$("mYes").addEventListener("click", () => { $("modal").hidden = true; const fn = pending; pending = null; if (fn) fn(); });
+$("entryList").addEventListener("click", (ev) => {
+  const t = ev.target.closest("button"); if (!t) return;
+  const id = t.dataset.edit || t.dataset.del, e = state.entries.find(x => x.id === id); if (!e) return;
+  if (t.dataset.edit) {
+    state.editingId = id; $("fName").value = e.name || ""; $("fAge").value = e.age ?? ""; $("fGrip").value = e.grip; $("fRpm").value = e.rpm;
+    $("formTitle").textContent = "Edit " + e.name; $("saveBtn").textContent = "Save changes"; $("cancelEdit").hidden = false; updatePreview(); msg("formMsg", "", true);
+    $("entryForm").scrollIntoView({ behavior: "smooth" });
+  } else {
+    confirmBox(`Delete ${e.name}?`, "Their score is removed from the leaderboard. This can't be undone.", "Delete", async () => {
+      try { await deleteDoc(doc(db, "entries", id)); if (state.editingId === id) resetForm(); msg("formMsg", `Deleted ${e.name}.`, true); } catch (err) { msg("formMsg", writeErr(err), false); }
+    });
+  }
+});
+$("cfgForm").addEventListener("submit", async (ev) => {
+  ev.preventDefault();
+  const g = Number($("cGrip").value), r = Number($("cRpm").value);
+  if (!(g >= 10 && g <= 200)) { msg("cfgMsg", "Grip max should be 10 to 200 kg.", false); return; }
+  if (!(r >= 1000 && r <= 40000)) { msg("cfgMsg", "Gyroball max should be 1,000 to 40,000 RPM.", false); return; }
+  try { await setDoc(doc(db, "config", "settings"), { maxGrip: g, maxRpm: r }); msg("cfgMsg", "Scoring saved. Everyone is re-scored.", true); } catch (e) { msg("cfgMsg", writeErr(e), false); }
+});
+const csv = () => ["Rank,Name,Age,Grip (kg),Gyroball (RPM),Score", ...ranked().map(e => [e.rank, `"${String(e.name).replace(/"/g, '""')}"`, e.age ?? "", e.grip, e.rpm, e.score].join(","))].join("\n");
+$("copyCsv").addEventListener("click", async () => {
+  const text = csv();
+  try { await navigator.clipboard.writeText(text); msg("resMsg", `Copied ${state.entries.length} results.`, true); }
+  catch (e) { const t = $("csvOut"); t.value = text; t.hidden = false; t.select(); msg("resMsg", "Select all and copy the text in the box.", true); }
+});
+$("clearAll").addEventListener("click", () => {
+  if (!state.entries.length) { msg("resMsg", "There are no entries to clear.", true); return; }
+  confirmBox(`Clear all ${state.entries.length} entries?`, "Copy the results first if you need them. This can't be undone.", "Clear all", async () => {
+    try { for (const e of [...state.entries]) await deleteDoc(doc(db, "entries", e.id)); msg("resMsg", "All entries cleared.", true); } catch (err) { msg("resMsg", writeErr(err), false); }
+  });
+});
+
+route(); render();
+</script>
+</body>
+</html>
