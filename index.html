@@ -110,6 +110,32 @@ button, input { font: inherit; color: inherit; letter-spacing: inherit; }
   .steps .step span { display: none; }
 }
 
+/* Two boards */
+.beat2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1.4vw; }
+.tile { background: rgba(255,255,255,.06); border: 1px solid rgba(255,255,255,.14); border-radius: 22px; padding: 2vh 2.4vw; display: flex; flex-direction: column; gap: .6vh; min-width: 0; }
+.tile .lbl { font-size: clamp(12px, 1.4vh, 17px); letter-spacing: .16em; text-transform: uppercase; color: var(--sand); }
+.tile .big { font-family: var(--mono); font-size: clamp(48px, 7vh, 110px); line-height: .9; font-weight: 500; letter-spacing: -0.06em; }
+.tile .big small { font-size: .3em; color: rgba(255,255,255,.55); letter-spacing: 0; margin-left: 6px; }
+.tile .who { font-size: clamp(14px, 1.8vh, 24px); color: rgba(255,255,255,.8); overflow-wrap: anywhere; }
+.boards { flex: 1 1 auto; min-height: 0; display: grid; grid-template-columns: 1fr 1fr; gap: 1.4vw; }
+.board { border: 1px solid var(--line); border-radius: 22px; overflow: hidden; display: flex; flex-direction: column; min-height: 0; min-width: 0; }
+.board .bh { background: var(--night); color: #fff; padding: 1.6vh 1.8vw; display: flex; justify-content: space-between; align-items: baseline; gap: 10px; }
+.board .bh b { font-weight: 500; font-size: clamp(18px, 2.4vh, 32px); letter-spacing: -0.03em; }
+.board .bh span { color: var(--sand); font-size: clamp(11px, 1.3vh, 15px); letter-spacing: .14em; text-transform: uppercase; }
+.brow { display: grid; grid-template-columns: 2.4em 1fr auto; align-items: center; gap: 10px; padding: 0 1.6vw; min-height: clamp(40px, 5vh, 66px); border-bottom: 1px solid var(--line); font-size: clamp(15px, 2vh, 26px); }
+.brow:last-child { border-bottom: 0; }
+.brow .rk { font-family: var(--mono); color: var(--muted); display: inline-flex; align-items: center; gap: 6px; }
+.brow .rk i { width: 10px; height: 10px; border-radius: 50%; }
+.brow.m1 .rk i { background: var(--gold); } .brow.m2 .rk i { background: var(--silver); } .brow.m3 .rk i { background: var(--bronze); }
+.brow .nm { font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.brow .val { font-family: var(--mono); font-weight: 600; letter-spacing: -0.03em; }
+.brow .val small { font-weight: 400; opacity: .55; font-size: .6em; margin-left: 4px; letter-spacing: 0; }
+.brow.m1 { background: var(--cobalt); color: #fff; min-height: clamp(56px, 7.5vh, 104px); font-size: clamp(19px, 2.8vh, 36px); }
+.brow.m1 .rk { color: rgba(255,255,255,.75); }
+.brow.flash:not(.m1) { animation: flash 2.6s ease-out; }
+.board .empty { padding: 2vh 1.8vw; color: var(--muted); font-size: clamp(14px, 1.8vh, 22px); }
+@media (orientation: landscape) { .boards { grid-row: 3; grid-column: 1 / -1; } }
+
 /* Toast */
 .toast { position: fixed; left: 50%; bottom: 4vh; transform: translate(-50%, 160%); background: var(--night); color: #fff; border-radius: 999px; padding: 1.6vh 2.6vw; display: flex; align-items: center; gap: 16px; font-size: clamp(16px, 2.4vh, 32px); box-shadow: 0 14px 40px rgba(0,0,0,.25); transition: transform .45s cubic-bezier(.2,.9,.3,1.2); z-index: 40; max-width: calc(100% - 32px); white-space: nowrap; }
 .toast:not(.show) { visibility: hidden; transition: transform .45s, visibility 0s .45s; }
@@ -129,8 +155,9 @@ button, input { font: inherit; color: inherit; letter-spacing: inherit; }
 .fields { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
 .field { display: flex; flex-direction: column; gap: 6px; }
 .field.wide { grid-column: 1 / -1; }
+.fields1 { grid-template-columns: 1fr; }
 label { font-size: 13px; color: var(--muted); }
-input[type="text"], input[type="number"], input[type="email"], input[type="password"] { background: var(--soft); border: 1px solid transparent; border-radius: 14px; padding: 14px 16px; font-size: 20px; width: 100%; }
+input[type="text"], input[type="number"], input[type="email"], input[type="password"], input[type="tel"] { background: var(--soft); border: 1px solid transparent; border-radius: 14px; padding: 14px 16px; font-size: 20px; width: 100%; }
 input[type="number"] { font-family: var(--mono); }
 input:focus { border-color: var(--cobalt); background: #fff; outline: none; }
 .preview { display: flex; align-items: baseline; gap: 10px; color: var(--muted); font-size: 14px; flex-wrap: wrap; }
@@ -155,6 +182,16 @@ input:focus { border-color: var(--cobalt); background: #fff; outline: none; }
 textarea { width: 100%; min-height: 120px; background: var(--soft); border: 0; border-radius: 14px; padding: 12px; font: 12px/1.4 var(--mono); }
 .modal { position: fixed; inset: 0; background: rgba(0,0,0,.4); display: flex; align-items: center; justify-content: center; padding: 16px; z-index: 50; }
 .modal .card { max-width: 420px; width: 100%; }
+/* compact portrait so both boards show 10 rows */
+.hero h1 { font-size: clamp(34px, 4.8vh, 80px); }
+.hero p { font-size: clamp(14px, 1.6vh, 22px); margin-top: .6vh; }
+.hero { gap: 1.6vh; padding: 2.4vh 3.6vw; }
+.tile .big { font-size: clamp(40px, 5.6vh, 96px); }
+.steps .step { padding: 1.1vh 1.6vw; }
+.steps .step span { display: none; }
+.brow { grid-template-columns: 2.2em minmax(0,1fr) auto; min-height: clamp(36px, 4.3vh, 60px); padding: 0 1.4vw; font-size: clamp(14px, 1.8vh, 24px); }
+.brow.m1 { min-height: clamp(48px, 6vh, 86px); font-size: clamp(17px, 2.3vh, 32px); }
+.board .bh { padding: 1.2vh 1.6vw; }
 @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation: none !important; transition: none !important; } }
 </style>
 </head>
@@ -168,23 +205,25 @@ textarea { width: 100%; min-height: 120px; background: var(--soft); border: 0; b
       <span class="live"><i></i>Live challenge</span>
     </div>
     <div>
-      <h1>Strongest grip in the room?</h1>
-      <p>One squeeze. One spin. Beat the top score and walk away with Ultrahuman goodies.</p>
+      <h1>Strongest grip. Fastest spin.</h1>
+      <p>Two challenges, two leaderboards. Top 3 on each board walk away with Ultrahuman goodies.</p>
     </div>
-    <div class="beat" id="beat"></div>
+    <div class="beat2" id="beat"></div>
   </div>
 
   <div class="steps">
     <div class="step"><div class="n">01</div><div><b>Squeeze</b><span>Grip strength, dominant hand, one try</span></div></div>
     <div class="step"><div class="n">02</div><div><b>Spin</b><span>Gyroball, as fast as you can, one try</span></div></div>
-    <div class="step"><div class="n">03</div><div><b>Climb the board</b><span>Top 3 win goodies</span></div></div>
+    <div class="step"><div class="n">03</div><div><b>Climb both boards</b><span>Top 3 on each board win goodies</span></div></div>
   </div>
 
-  <div class="podium" id="podium"></div>
-  <div class="ranks" id="ranks"></div>
+  <div class="boards">
+    <section class="board" id="boardGrip" aria-label="Grip strength leaderboard"></section>
+    <section class="board" id="boardGyro" aria-label="Gyroball leaderboard"></section>
+  </div>
 
   <div class="foot">
-    <span>Score = average of grip and gyroball points, each out of 100</span>
+    <span>Two separate boards: grip strength in kg, gyroball in RPM</span>
     <span class="conn" id="conn"><i></i><span id="connText">Connecting</span></span>
   </div>
 </main>
@@ -206,15 +245,15 @@ textarea { width: 100%; min-height: 120px; background: var(--soft); border: 0; b
   <div id="adminBody" hidden style="display:flex;flex-direction:column;gap:16px">
     <form class="card" id="entryForm" novalidate>
       <h2 id="formTitle">New challenger</h2>
-      <div class="fields">
-        <div class="field wide"><label for="fName">Name</label><input type="text" id="fName" maxlength="40" autocomplete="off" required></div>
+      <div class="fields fields1">
+        <div class="field"><label for="fName">Name</label><input type="text" id="fName" maxlength="40" autocomplete="off" required></div>
+        <div class="field"><label for="fGrip">Grip strength, dominant hand (kg)</label><input type="number" id="fGrip" inputmode="decimal" min="0" max="150" step="0.1"></div>
+        <div class="field"><label for="fRpm">Gyroball (RPM)</label><input type="number" id="fRpm" inputmode="numeric" min="0" max="30000" step="1"></div>
         <div class="field"><label for="fAge">Age</label><input type="number" id="fAge" inputmode="numeric" min="5" max="100" step="1"></div>
-        <div class="field"><label for="fGrip">Grip, dominant (kg)</label><input type="number" id="fGrip" inputmode="decimal" min="0" max="150" step="0.1" required></div>
-        <div class="field"><label for="fPhone">Phone</label><input type="tel" id="fPhone" inputmode="tel" autocomplete="off" maxlength="20"></div>
+        <div class="field"><label for="fPhone">Phone (phone or email needed)</label><input type="tel" id="fPhone" inputmode="tel" autocomplete="off" maxlength="20"></div>
         <div class="field"><label for="fEmail">Email</label><input type="email" id="fEmail" inputmode="email" autocomplete="off" maxlength="80"></div>
-        <div class="field wide"><label for="fRpm">Gyroball (RPM)</label><input type="number" id="fRpm" inputmode="numeric" min="0" max="30000" step="1" required></div>
       </div>
-      <div class="preview">Score <b id="pv">–</b><span id="pvParts"></span></div>
+      <div class="preview"><span id="pvParts">Fill grip and/or gyroball to see where they would rank.</span><b id="pv" hidden></b></div>
       <div class="actions">
         <button class="btn primary" type="submit" id="saveBtn">Save score</button>
         <button class="btn" type="button" id="cancelEdit" hidden>Cancel edit</button>
@@ -228,7 +267,7 @@ textarea { width: 100%; min-height: 120px; background: var(--soft); border: 0; b
       <div class="list" id="entryList"></div>
     </div>
 
-    <form class="card" id="cfgForm" novalidate>
+    <form class="card" id="cfgForm" novalidate hidden>
       <h2>Scoring</h2>
       <p class="hint">Each test becomes points out of 100 against its max. At or above the max scores 100. Changing these re-scores everyone.</p>
       <div class="fields">
@@ -310,27 +349,24 @@ async function keepAwake() { try { if ("wakeLock" in navigator && !wake) { wake 
 document.addEventListener("visibilitychange", () => { if (document.visibilityState === "visible" && location.hash !== "#admin") keepAwake(); });
 
 // ---------- display render ----------
+function board(field) {
+  return state.entries.filter(e => e[field] > 0).sort((a, b) => (b[field] - a[field]) || ((a.createdAt || 0) - (b.createdAt || 0)));
+}
+function tile(label, list, field, unit, dec) {
+  const t = list[0];
+  return `<div class="tile"><span class="lbl">${label}</span>` + (t
+    ? `<div class="big">${fmt(t[field], dec)}<small>${unit}</small></div><div class="who">held by ${esc(t.name)}</div>`
+    : `<div class="big">–<small>${unit}</small></div><div class="who">Nobody yet. Be the first.</div>`) + `</div>`;
+}
+function renderBoard(el, title, unit, list, field, dec) {
+  const rows = list.slice(0, 8).map((e, i) => `<div class="brow${i < 3 ? " m" + (i + 1) : ""}${e.id === state.flashId ? " flash" : ""}"><span class="rk">${i < 3 ? "<i></i>" : ""}${String(i + 1).padStart(2, "0")}</span><span class="nm">${esc(e.name)}</span><span class="val">${fmt(e[field], dec)}<small>${unit}</small></span></div>`).join("");
+  el.innerHTML = `<div class="bh"><b>${title}</b><span>Top 8 · ${unit}</span></div>` + (rows || `<div class="empty">No scores yet. Step up and claim #1.</div>`);
+}
 function renderDisplay() {
-  const list = ranked(), top = list[0];
-  const best = list.reduce((m, e) => ({ g: Math.max(m.g, e.grip || 0), r: Math.max(m.r, e.rpm || 0) }), { g: 0, r: 0 });
-  $("beat").innerHTML = top
-    ? `<span class="lbl">Score to beat</span><div><div class="big">${fmt(top.score, 1)}<small>/ 100</small></div><div class="who">held by ${esc(top.name)}</div></div>
-       <div class="stats"><span><b>${list.length}</b>challengers</span><span><b>${fmt(best.g, 1)}</b>best grip kg</span><span><b>${fmt(best.r)}</b>best RPM</span></div>`
-    : `<span class="lbl">Score to beat</span><div><div class="big">00.0<small>/ 100</small></div><div class="who">Nobody yet. Be the first on the board.</div></div>
-       <div class="stats"><span><b>0</b>challengers</span></div>`;
-
-  const labels = ["1st", "2nd", "3rd"];
-  $("podium").innerHTML = [0, 1, 2].map(i => {
-    const e = list[i], cls = `place p${i + 1}`;
-    if (!e) return `<div class="${cls} empty"><div><span class="medal"><i></i>${labels[i]}</span><div class="name">Your name here</div><div class="parts">Spot open</div></div></div>`;
-    const info = `<div><span class="medal"><i></i>${labels[i]}</span><div class="name">${esc(e.name)}</div><div class="parts">Grip ${fmt(e.grip, 1)} kg · Gyro ${fmt(e.rpm)} RPM</div></div>`;
-    return `<div class="${cls}">${info}<div class="score">${fmt(e.score, 1)}<small>/ 100</small></div></div>`;
-  }).join("");
-
-  const rest = list.slice(3, 10);
-  $("ranks").innerHTML = `<div class="row head"><span>Rank</span><span>Name</span><span class="r">Grip kg</span><span class="r">RPM</span><span class="r">Score</span></div>` +
-    (rest.length ? rest.map(e => `<div class="row${e.id === state.flashId ? " flash" : ""}"><span class="rk">${String(e.rank).padStart(2, "0")}</span><span class="nm">${esc(e.name)}</span><span class="r">${fmt(e.grip, 1)}</span><span class="r">${fmt(e.rpm)}</span><span class="r sc">${fmt(e.score, 1)}</span></div>`).join("")
-      : `<div class="empty">${list.length >= 3 ? "Ranks 4 to 10 appear here." : "Step up and claim a podium spot."}</div>`);
+  const g = board("grip"), r = board("rpm");
+  $("beat").innerHTML = tile("Top grip to beat", g, "grip", "kg", 1) + tile("Top spin to beat", r, "rpm", "RPM", 0);
+  renderBoard($("boardGrip"), "Grip strength", "kg", g, "grip", 1);
+  renderBoard($("boardGyro"), "Gyroball", "RPM", r, "rpm", 0);
 }
 
 // ---------- toast ----------
@@ -339,21 +375,24 @@ function toast(html, leader) {
   const t = $("toast"); t.innerHTML = html; t.className = "toast show" + (leader ? " leader" : "");
   clearTimeout(toastTimer); toastTimer = setTimeout(() => { t.className = "toast" + (leader ? " leader" : ""); }, 5500);
 }
+function leaders() { return { g: (board("grip")[0] || {}).id, r: (board("rpm")[0] || {}).id }; }
 function announce(id, before) {
-  const list = ranked(), e = list.find(x => x.id === id); if (!e) return;
+  const e = state.entries.find(x => x.id === id); if (!e) return;
   state.flashId = id;
-  if (e.rank === 1 && (!before[0] || before[0].id !== id)) toast(`<span class="tag">New leader</span><span>${esc(first(e.name))} takes #1 with <b>${fmt(e.score, 1)}</b></span>`, true);
-  else toast(`<span class="tag">New score</span><span>${esc(first(e.name))} · <b>${fmt(e.score, 1)}</b> · #${e.rank}</span>`, false);
+  const now = leaders();
+  if (e.grip > 0 && now.g === id && before.g !== id) return toast(`<span class="tag">New grip leader</span><span>${esc(first(e.name))} · <b>${fmt(e.grip, 1)} kg</b></span>`, true);
+  if (e.rpm > 0 && now.r === id && before.r !== id) return toast(`<span class="tag">New spin leader</span><span>${esc(first(e.name))} · <b>${fmt(e.rpm)} RPM</b></span>`, true);
+  const parts = [e.grip > 0 ? `<b>${fmt(e.grip, 1)} kg</b>` : "", e.rpm > 0 ? `<b>${fmt(e.rpm)} RPM</b>` : ""].filter(Boolean).join(" · ");
+  toast(`<span class="tag">New score</span><span>${esc(first(e.name))} · ${parts}</span>`, false);
 }
 
 // ---------- admin render ----------
+function rankIn(field, id) { const i = board(field).findIndex(x => x.id === id); return i < 0 ? "–" : "#" + (i + 1); }
 function renderAdmin() {
-  const list = ranked().sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
-  $("entryList").innerHTML = list.length ? list.map(e => `<div class="item"><div><div class="nm">${esc(e.name)}${e.age ? ` <span style="color:var(--muted);font-weight:400">· ${esc(e.age)}</span>` : ""}</div><div class="sub">#${e.rank} · ${fmt(e.grip, 1)} kg · ${fmt(e.rpm)} RPM</div>${contactLine(e.id)}</div><div class="sc">${fmt(e.score, 1)}</div>
+  const list = [...state.entries].sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
+  $("entryList").innerHTML = list.length ? list.map(e => `<div class="item"><div><div class="nm">${esc(e.name)}${e.age ? ` <span style="color:var(--muted);font-weight:400">· ${esc(e.age)}</span>` : ""}</div><div class="sub">Grip ${e.grip > 0 ? fmt(e.grip, 1) + " kg (" + rankIn("grip", e.id) + ")" : "–"} · Gyro ${e.rpm > 0 ? fmt(e.rpm) + " RPM (" + rankIn("rpm", e.id) + ")" : "–"}</div>${contactLine(e.id)}</div><div></div>
     <div class="act"><button class="btn small" type="button" data-edit="${esc(e.id)}">Edit</button><button class="btn small danger" type="button" data-del="${esc(e.id)}">Delete</button></div></div>`).join("")
     : `<div class="item"><span class="hint">Nothing entered yet.</span></div>`;
-  if (document.activeElement !== $("cGrip")) $("cGrip").value = state.cfg.maxGrip;
-  if (document.activeElement !== $("cRpm")) $("cRpm").value = state.cfg.maxRpm;
   updatePreview();
 }
 function contactLine(id) { const c = state.contacts[id]; if (!c || (!c.phone && !c.email)) return ""; return `<div class="sub">${esc([c.phone, c.email].filter(Boolean).join(" · "))}</div>`; }
@@ -364,7 +403,7 @@ function setConn(kind, text) { $("conn").className = "conn " + kind; $("connText
 const loadTimer = setTimeout(() => { if (!state.ready) setConn("err", "Can't reach scores. Check internet."); }, 10000);
 onSnapshot(doc(db, "config", "settings"), (snap) => { state.cfg = { ...DEFAULT_CFG, ...(snap.exists() ? snap.data() : {}) }; render(); }, () => {});
 onSnapshot(collection(db, "entries"), (snap) => {
-  const before = ranked();
+  const before = leaders();
   state.entries = snap.docs.map(d => ({ id: d.id, ...d.data() }));
   if (state.ready) { const added = snap.docChanges().filter(c => c.type === "added"); if (added.length) announce(added[added.length - 1].doc.id, before); }
   if (!snap.metadata.fromCache) { state.ready = true; clearTimeout(loadTimer); setConn("live", "Live"); }
@@ -400,16 +439,15 @@ function validate(f) {
   if (f.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(f.email)) return "Check the email address.";
   if (f.phone && !/^[+\d][\d\s-]{6,18}$/.test(f.phone)) return "Check the phone number.";
   if (f.age != null && (!Number.isInteger(f.age) || f.age < 5 || f.age > 100)) return "Age should be a whole number from 5 to 100.";
-  if (!(f.grip > 0) || f.grip > 150) return "Grip should be between 0.1 and 150 kg.";
-  if (!(f.rpm > 0) || f.rpm > 30000) return "Gyroball should be between 1 and 30,000 RPM.";
+  if (!(f.grip > 0) && !(f.rpm > 0)) return "Enter a grip score, a gyroball score, or both.";
+  if (f.grip < 0 || f.grip > 150) return "Grip should be between 0.1 and 150 kg.";
+  if (f.rpm < 0 || f.rpm > 30000) return "Gyroball should be between 1 and 30,000 RPM.";
   return "";
 }
+function wouldRank(field, v) { if (!(v > 0)) return null; return 1 + state.entries.filter(e => e.id !== state.editingId && e[field] > v).length; }
 function updatePreview() {
-  const f = readForm();
-  if (f.grip > 0 || f.rpm > 0) {
-    const g = pts(f.grip, state.cfg.maxGrip), r = pts(f.rpm, state.cfg.maxRpm);
-    $("pv").textContent = fmt(Math.round(((g + r) / 2) * 10) / 10, 1); $("pvParts").textContent = `grip ${fmt(g, 1)} + gyro ${fmt(r, 1)} pts`;
-  } else { $("pv").textContent = "–"; $("pvParts").textContent = ""; }
+  const f = readForm(), g = wouldRank("grip", f.grip), r = wouldRank("rpm", f.rpm);
+  $("pvParts").textContent = (g || r) ? ["Would rank", g ? `Grip #${g}` : "", r ? `Gyro #${r}` : ""].filter(Boolean).join(" · ").replace("rank · ", "rank ") : "Fill grip and/or gyroball to see where they would rank.";
 }
 ["fGrip", "fRpm"].forEach(id => $(id).addEventListener("input", updatePreview));
 function resetForm() { state.editingId = null; $("entryForm").reset(); $("formTitle").textContent = "New challenger"; $("saveBtn").textContent = "Save score"; $("cancelEdit").hidden = true; updatePreview(); }
@@ -430,8 +468,7 @@ $("entryForm").addEventListener("submit", async (ev) => {
       const ref = await addDoc(collection(db, "entries"), { name: f.name, age: f.age, grip: f.grip, rpm: f.rpm, createdAt: Date.now() });
       if (f.phone || f.email) await setDoc(doc(db, "contacts", ref.id), { name: f.name, phone: f.phone, email: f.email, updatedAt: Date.now() });
     }
-    const sc = Math.round(((pts(f.grip, state.cfg.maxGrip) + pts(f.rpm, state.cfg.maxRpm)) / 2) * 10) / 10;
-    msg("formMsg", `${editing ? "Updated" : "Saved"} ${f.name}: ${fmt(sc, 1)} / 100.`, true); resetForm();
+    msg("formMsg", `${editing ? "Updated" : "Saved"} ${f.name}.`, true); resetForm();
   } catch (e) { msg("formMsg", writeErr(e), false); }
   saving = false; $("saveBtn").disabled = false;
 });
@@ -445,7 +482,7 @@ $("entryList").addEventListener("click", (ev) => {
   const t = ev.target.closest("button"); if (!t) return;
   const id = t.dataset.edit || t.dataset.del, e = state.entries.find(x => x.id === id); if (!e) return;
   if (t.dataset.edit) {
-    state.editingId = id; $("fName").value = e.name || ""; $("fAge").value = e.age ?? ""; $("fGrip").value = e.grip; $("fRpm").value = e.rpm; const c = state.contacts[id] || {}; $("fPhone").value = c.phone || ""; $("fEmail").value = c.email || "";
+    state.editingId = id; $("fName").value = e.name || ""; $("fAge").value = e.age ?? ""; $("fGrip").value = e.grip > 0 ? e.grip : ""; $("fRpm").value = e.rpm > 0 ? e.rpm : ""; const c = state.contacts[id] || {}; $("fPhone").value = c.phone || ""; $("fEmail").value = c.email || "";
     $("formTitle").textContent = "Edit " + e.name; $("saveBtn").textContent = "Save changes"; $("cancelEdit").hidden = false; updatePreview(); msg("formMsg", "", true);
     $("entryForm").scrollIntoView({ behavior: "smooth" });
   } else {
@@ -461,7 +498,7 @@ $("cfgForm").addEventListener("submit", async (ev) => {
   if (!(r >= 1000 && r <= 40000)) { msg("cfgMsg", "Gyroball max should be 1,000 to 40,000 RPM.", false); return; }
   try { await setDoc(doc(db, "config", "settings"), { maxGrip: g, maxRpm: r }); msg("cfgMsg", "Scoring saved. Everyone is re-scored.", true); } catch (e) { msg("cfgMsg", writeErr(e), false); }
 });
-const csv = () => ["Rank,Name,Age,Phone,Email,Grip (kg),Gyroball (RPM),Score", ...ranked().map(e => [e.rank, `"${String(e.name).replace(/"/g, '""')}"`, e.age ?? "", (state.contacts[e.id] || {}).phone || "", (state.contacts[e.id] || {}).email || "", e.grip, e.rpm, e.score].join(","))].join("\n");
+const csv = () => ["Name,Age,Phone,Email,Grip (kg),Grip rank,Gyroball (RPM),Gyro rank", ...[...state.entries].sort((a, b) => (a.createdAt || 0) - (b.createdAt || 0)).map(e => [`"${String(e.name).replace(/"/g, '""')}"`, e.age ?? "", (state.contacts[e.id] || {}).phone || "", (state.contacts[e.id] || {}).email || "", e.grip > 0 ? e.grip : "", e.grip > 0 ? rankIn("grip", e.id).slice(1) : "", e.rpm > 0 ? e.rpm : "", e.rpm > 0 ? rankIn("rpm", e.id).slice(1) : ""].join(","))].join("\n");
 $("copyCsv").addEventListener("click", async () => {
   const text = csv();
   try { await navigator.clipboard.writeText(text); msg("resMsg", `Copied ${state.entries.length} results.`, true); }
