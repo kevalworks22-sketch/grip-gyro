@@ -210,6 +210,8 @@ textarea { width: 100%; min-height: 120px; background: var(--soft); border: 0; b
         <div class="field wide"><label for="fName">Name</label><input type="text" id="fName" maxlength="40" autocomplete="off" required></div>
         <div class="field"><label for="fAge">Age</label><input type="number" id="fAge" inputmode="numeric" min="5" max="100" step="1"></div>
         <div class="field"><label for="fGrip">Grip, dominant (kg)</label><input type="number" id="fGrip" inputmode="decimal" min="0" max="150" step="0.1" required></div>
+        <div class="field"><label for="fPhone">Phone</label><input type="tel" id="fPhone" inputmode="tel" autocomplete="off" maxlength="20"></div>
+        <div class="field"><label for="fEmail">Email</label><input type="email" id="fEmail" inputmode="email" autocomplete="off" maxlength="80"></div>
         <div class="field wide"><label for="fRpm">Gyroball (RPM)</label><input type="number" id="fRpm" inputmode="numeric" min="0" max="30000" step="1" required></div>
       </div>
       <div class="preview">Score <b id="pv">–</b><span id="pvParts"></span></div>
@@ -276,7 +278,7 @@ const db = getFirestore(app);
 const auth = getAuth(app);
 
 const DEFAULT_CFG = { maxGrip: 80, maxRpm: 15000 };
-const state = { entries: [], cfg: { ...DEFAULT_CFG }, ready: false, flashId: null, editingId: null, user: null };
+const state = { entries: [], cfg: { ...DEFAULT_CFG }, ready: false, flashId: null, editingId: null, user: null, contacts: {} };
 const $ = (id) => document.getElementById(id);
 
 // ---------- scoring ----------
@@ -347,13 +349,14 @@ function announce(id, before) {
 // ---------- admin render ----------
 function renderAdmin() {
   const list = ranked().sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
-  $("entryList").innerHTML = list.length ? list.map(e => `<div class="item"><div><div class="nm">${esc(e.name)}${e.age ? ` <span style="color:var(--muted);font-weight:400">· ${esc(e.age)}</span>` : ""}</div><div class="sub">#${e.rank} · ${fmt(e.grip, 1)} kg · ${fmt(e.rpm)} RPM</div></div><div class="sc">${fmt(e.score, 1)}</div>
+  $("entryList").innerHTML = list.length ? list.map(e => `<div class="item"><div><div class="nm">${esc(e.name)}${e.age ? ` <span style="color:var(--muted);font-weight:400">· ${esc(e.age)}</span>` : ""}</div><div class="sub">#${e.rank} · ${fmt(e.grip, 1)} kg · ${fmt(e.rpm)} RPM</div>${contactLine(e.id)}</div><div class="sc">${fmt(e.score, 1)}</div>
     <div class="act"><button class="btn small" type="button" data-edit="${esc(e.id)}">Edit</button><button class="btn small danger" type="button" data-del="${esc(e.id)}">Delete</button></div></div>`).join("")
     : `<div class="item"><span class="hint">Nothing entered yet.</span></div>`;
   if (document.activeElement !== $("cGrip")) $("cGrip").value = state.cfg.maxGrip;
   if (document.activeElement !== $("cRpm")) $("cRpm").value = state.cfg.maxRpm;
   updatePreview();
 }
+function contactLine(id) { const c = state.contacts[id]; if (!c || (!c.phone && !c.email)) return ""; return `<div class="sub">${esc([c.phone, c.email].filter(Boolean).join(" · "))}</div>`; }
 function render() { renderDisplay(); renderAdmin(); }
 
 // ---------- data ----------
@@ -369,8 +372,11 @@ onSnapshot(collection(db, "entries"), (snap) => {
 }, () => setConn("err", "Live updates stopped. Reload."));
 
 // ---------- auth ----------
+let unsubContacts = null;
 onAuthStateChanged(auth, (u) => {
   state.user = u;
+  if (unsubContacts) { unsubContacts(); unsubContacts = null; state.contacts = {}; }
+  if (u) unsubContacts = onSnapshot(collection(db, "contacts"), (snap) => { const m = {}; snap.docs.forEach(d => { m[d.id] = d.data(); }); state.contacts = m; renderAdmin(); }, () => {});
   $("loginForm").hidden = !!u; $("adminBody").hidden = !u;
   $("who").textContent = u ? (u.email || "") : "";
 });
@@ -388,9 +394,11 @@ function writeErr(e) {
 }
 
 // ---------- form ----------
-const readForm = () => ({ name: $("fName").value.trim().replace(/\s+/g, " "), age: $("fAge").value === "" ? null : Number($("fAge").value), grip: Number($("fGrip").value), rpm: Number($("fRpm").value) });
+const readForm = () => ({ phone: $("fPhone").value.trim(), email: $("fEmail").value.trim(), name: $("fName").value.trim().replace(/\s+/g, " "), age: $("fAge").value === "" ? null : Number($("fAge").value), grip: Number($("fGrip").value), rpm: Number($("fRpm").value) });
 function validate(f) {
   if (!f.name) return "Enter a name.";
+  if (f.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(f.email)) return "Check the email address.";
+  if (f.phone && !/^[+\d][\d\s-]{6,18}$/.test(f.phone)) return "Check the phone number.";
   if (f.age != null && (!Number.isInteger(f.age) || f.age < 5 || f.age > 100)) return "Age should be a whole number from 5 to 100.";
   if (!(f.grip > 0) || f.grip > 150) return "Grip should be between 0.1 and 150 kg.";
   if (!(f.rpm > 0) || f.rpm > 30000) return "Gyroball should be between 1 and 30,000 RPM.";
@@ -417,8 +425,10 @@ $("entryForm").addEventListener("submit", async (ev) => {
     if (editing) {
       const old = state.entries.find(e => e.id === editing) || {};
       await setDoc(doc(db, "entries", editing), { name: f.name, age: f.age, grip: f.grip, rpm: f.rpm, createdAt: old.createdAt || Date.now() });
+      await setDoc(doc(db, "contacts", editing), { name: f.name, phone: f.phone, email: f.email, updatedAt: Date.now() });
     } else {
-      await addDoc(collection(db, "entries"), { name: f.name, age: f.age, grip: f.grip, rpm: f.rpm, createdAt: Date.now() });
+      const ref = await addDoc(collection(db, "entries"), { name: f.name, age: f.age, grip: f.grip, rpm: f.rpm, createdAt: Date.now() });
+      if (f.phone || f.email) await setDoc(doc(db, "contacts", ref.id), { name: f.name, phone: f.phone, email: f.email, updatedAt: Date.now() });
     }
     const sc = Math.round(((pts(f.grip, state.cfg.maxGrip) + pts(f.rpm, state.cfg.maxRpm)) / 2) * 10) / 10;
     msg("formMsg", `${editing ? "Updated" : "Saved"} ${f.name}: ${fmt(sc, 1)} / 100.`, true); resetForm();
@@ -435,12 +445,12 @@ $("entryList").addEventListener("click", (ev) => {
   const t = ev.target.closest("button"); if (!t) return;
   const id = t.dataset.edit || t.dataset.del, e = state.entries.find(x => x.id === id); if (!e) return;
   if (t.dataset.edit) {
-    state.editingId = id; $("fName").value = e.name || ""; $("fAge").value = e.age ?? ""; $("fGrip").value = e.grip; $("fRpm").value = e.rpm;
+    state.editingId = id; $("fName").value = e.name || ""; $("fAge").value = e.age ?? ""; $("fGrip").value = e.grip; $("fRpm").value = e.rpm; const c = state.contacts[id] || {}; $("fPhone").value = c.phone || ""; $("fEmail").value = c.email || "";
     $("formTitle").textContent = "Edit " + e.name; $("saveBtn").textContent = "Save changes"; $("cancelEdit").hidden = false; updatePreview(); msg("formMsg", "", true);
     $("entryForm").scrollIntoView({ behavior: "smooth" });
   } else {
     confirmBox(`Delete ${e.name}?`, "Their score is removed from the leaderboard. This can't be undone.", "Delete", async () => {
-      try { await deleteDoc(doc(db, "entries", id)); if (state.editingId === id) resetForm(); msg("formMsg", `Deleted ${e.name}.`, true); } catch (err) { msg("formMsg", writeErr(err), false); }
+      try { await deleteDoc(doc(db, "entries", id)); await deleteDoc(doc(db, "contacts", id)).catch(() => {}); if (state.editingId === id) resetForm(); msg("formMsg", `Deleted ${e.name}.`, true); } catch (err) { msg("formMsg", writeErr(err), false); }
     });
   }
 });
@@ -451,7 +461,7 @@ $("cfgForm").addEventListener("submit", async (ev) => {
   if (!(r >= 1000 && r <= 40000)) { msg("cfgMsg", "Gyroball max should be 1,000 to 40,000 RPM.", false); return; }
   try { await setDoc(doc(db, "config", "settings"), { maxGrip: g, maxRpm: r }); msg("cfgMsg", "Scoring saved. Everyone is re-scored.", true); } catch (e) { msg("cfgMsg", writeErr(e), false); }
 });
-const csv = () => ["Rank,Name,Age,Grip (kg),Gyroball (RPM),Score", ...ranked().map(e => [e.rank, `"${String(e.name).replace(/"/g, '""')}"`, e.age ?? "", e.grip, e.rpm, e.score].join(","))].join("\n");
+const csv = () => ["Rank,Name,Age,Phone,Email,Grip (kg),Gyroball (RPM),Score", ...ranked().map(e => [e.rank, `"${String(e.name).replace(/"/g, '""')}"`, e.age ?? "", (state.contacts[e.id] || {}).phone || "", (state.contacts[e.id] || {}).email || "", e.grip, e.rpm, e.score].join(","))].join("\n");
 $("copyCsv").addEventListener("click", async () => {
   const text = csv();
   try { await navigator.clipboard.writeText(text); msg("resMsg", `Copied ${state.entries.length} results.`, true); }
@@ -460,7 +470,7 @@ $("copyCsv").addEventListener("click", async () => {
 $("clearAll").addEventListener("click", () => {
   if (!state.entries.length) { msg("resMsg", "There are no entries to clear.", true); return; }
   confirmBox(`Clear all ${state.entries.length} entries?`, "Copy the results first if you need them. This can't be undone.", "Clear all", async () => {
-    try { for (const e of [...state.entries]) await deleteDoc(doc(db, "entries", e.id)); msg("resMsg", "All entries cleared.", true); } catch (err) { msg("resMsg", writeErr(err), false); }
+    try { for (const e of [...state.entries]) { await deleteDoc(doc(db, "entries", e.id)); await deleteDoc(doc(db, "contacts", e.id)).catch(() => {}); } msg("resMsg", "All entries cleared.", true); } catch (err) { msg("resMsg", writeErr(err), false); }
   });
 });
 
