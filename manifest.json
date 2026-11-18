@@ -1,6 +1,6 @@
 {
-  "name": "Grip & Jump Challenge",
-  "short_name": "Grip & Jump",
+  "name": "Grip & Gyro Challenge",
+  "short_name": "Grip & Gyro",
   "start_url": "./#display",
   "scope": "./",
   "display": "fullscreen",
